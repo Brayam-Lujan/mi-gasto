@@ -13,7 +13,7 @@
             <p>Backend para gestionar gastos e ingresos personales</p>
         </header>
 
-        <!-- Formulario para crear movimiento -->
+        <!-- Formulario para crear un nuevo movimiento (ingreso o gasto) -->
         <div class="card">
             <h2>Nuevo Movimiento</h2>
             <form id="formMovimiento">
@@ -30,7 +30,7 @@
             <div id="mensajeForm" class="mensaje"></div>
         </div>
 
-        <!-- Listado de movimientos -->
+        <!-- Listado de movimientos obtenidos desde la API -->
         <div class="card">
             <h2>Movimientos</h2>
             <button class="cargar" onclick="cargarMovimientos()">Cargar movimientos</button>
@@ -52,7 +52,7 @@
             </table>
         </div>
 
-        <!-- Balance -->
+        <!-- Panel de balance financiero -->
         <div class="card">
             <h2>Balance</h2>
             <button class="cargar" onclick="verBalance()">Calcular balance</button>
@@ -74,8 +74,9 @@
     </div>
 
     <script>
-        const API = '/movimientos';
+        const API = '/movimientos';  // Endpoint base de la API
 
+        // Muestra un mensaje temporal (éxito o error) al usuario
         function mostrarMensaje(id, texto, tipo) {
             const el = document.getElementById(id);
             el.textContent = texto;
@@ -84,6 +85,7 @@
             setTimeout(() => { el.style.display = 'none'; }, 5000);
         }
 
+        // Envía los datos del formulario a la API para crear un movimiento
         async function crearMovimiento(e) {
             e.preventDefault();
             const cuerpo = {
@@ -115,6 +117,7 @@
             }
         }
 
+        // Obtiene la lista de movimientos desde la API y los muestra en la tabla
         async function cargarMovimientos() {
             try {
                 const res = await fetch(API);
@@ -148,6 +151,7 @@
             }
         }
 
+        // Elimina un movimiento llamando al endpoint DELETE de la API
         async function eliminarMovimiento(id) {
             if (!confirm('¿Eliminar este movimiento?')) return;
             try {
@@ -162,6 +166,7 @@
             }
         }
 
+        // Obtiene el balance (ingresos, gastos, saldo) desde la API y lo muestra
         async function verBalance() {
             try {
                 const res = await fetch('/balance');
@@ -176,6 +181,7 @@
             }
         }
 
+        // Asigna el evento de envío del formulario a la función crearMovimiento
         document.getElementById('formMovimiento').addEventListener('submit', crearMovimiento);
     </script>
 </body>

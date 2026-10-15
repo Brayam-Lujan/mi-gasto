@@ -4,15 +4,14 @@ from app.config.database import Base
 from app.domain.models import TipoMovimiento
 
 
+# DBO (Data Base Object): representación del movimiento en la capa de persistencia SQLAlchemy
+# Es independiente del dominio; solo se usa para mapear a/desde tabla de base de datos
 class MovimientoDBO(Base):
-    """Data Base Object: representación del movimiento en la capa de persistencia."""
-
     __tablename__ = "movimientos"
 
     id = Column(Integer, primary_key=True, index=True)
     descripcion = Column(String, nullable=False)
-    # Numeric permite almacenar valores decimales de forma compatible con SQLite
-    # y se lee de nuevo como Decimal mediante el mapeador.
+    # Numeric(12,2) almacena valores decimales con precisión compatible con SQLite
     monto = Column(Numeric(12, 2), nullable=False)
     tipo = Column(Enum(TipoMovimiento), nullable=False)
     categoria = Column(String, nullable=False)

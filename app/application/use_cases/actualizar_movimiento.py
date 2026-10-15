@@ -4,17 +4,20 @@ from app.domain.exceptions import MovimientoNoEncontradoError
 from app.domain.models import Movimiento
 
 
+# Caso de uso: actualiza un movimiento existente (campos opcionales)
 class ActualizarMovimiento:
     def __init__(self, repository: IMovimientoRepository):
         self._repository = repository
 
     def ejecutar(self, movimiento_id: int, dto: MovimientoActualizarDTO) -> MovimientoRespuestaDTO:
+        # Verifica que el movimiento exista antes de actualizar
         existente = self._repository.obtener_por_id(movimiento_id)
         if existente is None:
             raise MovimientoNoEncontradoError(
                 f"No se encontró el movimiento con id {movimiento_id}"
             )
 
+        # Construye entidad actualizada conservando los valores no proporcionados
         actualizado = Movimiento(
             id=movimiento_id,
             descripcion=dto.descripcion if dto.descripcion is not None else existente.descripcion,
@@ -24,6 +27,7 @@ class ActualizarMovimiento:
             fecha=dto.fecha if dto.fecha is not None else existente.fecha,
         )
 
+        # Guarda los cambios a través del contrato de repositorio
         movimiento_guardado = self._repository.actualizar(actualizado)
         return MovimientoRespuestaDTO(
             id=movimiento_guardado.id,

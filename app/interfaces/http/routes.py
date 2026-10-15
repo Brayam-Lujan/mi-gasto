@@ -14,7 +14,7 @@ from app.application.use_cases.listar_movimientos import ListarMovimientos
 from app.application.use_cases.obtener_movimiento import ObtenerMovimiento
 from app.application.use_cases.actualizar_movimiento import ActualizarMovimiento
 from app.config.database import SessionLocal, engine
-from app.domain.models import TipoMovimiento
+from app.domain.models import Movimiento, TipoMovimiento
 from app.infrastructure.persistence.repository import SQLAlchemyMovimientoRepository
 from app.interfaces.http.schemas import (
     BalanceResponse,
@@ -25,10 +25,13 @@ from app.interfaces.http.schemas import (
 )
 from app.infrastructure.persistence.dbo.movimiento_dbo import MovimientoDBO
 from app.config.database import Base
+from datetime import datetime
+from decimal import Decimal
 
 router = APIRouter()
 
 
+# Inyección de dependencia: provee una instancia del repositorio concreto por petición
 def get_repository():
     db = SessionLocal()
     try:
@@ -37,11 +40,66 @@ def get_repository():
         db.close()
 
 
+# Crea las tablas en la base de datos al iniciar la aplicación
+# y carga datos de ejemplo si la tabla está vacía (base de datos en memoria recién iniciada)
 @router.on_event("startup")
 def crear_tablas():
     Base.metadata.create_all(bind=engine)
 
+    db = SessionLocal()
+    try:
+        repo = SQLAlchemyMovimientoRepository()
+        # Solo insertar datos de ejemplo si no hay movimientos registrados
+        if not repo.listar():
+            datos_iniciales = [
+                Movimiento(
+                    id=None,
+                    descripcion="Salario mensual",
+                    monto=Decimal("1500.00"),
+                    tipo=TipoMovimiento.INGRESO,
+                    categoria="Trabajo",
+                    fecha=datetime(2026, 10, 15, 8, 0, 0),
+                ),
+                Movimiento(
+                    id=None,
+                    descripcion="Trabajo freelance",
+                    monto=Decimal("500.00"),
+                    tipo=TipoMovimiento.INGRESO,
+                    categoria="Trabajo",
+                    fecha=datetime(2026, 10, 14, 8, 0, 0),
+                ),
+                Movimiento(
+                    id=None,
+                    descripcion="Supermercado",
+                    monto=Decimal("85.50"),
+                    tipo=TipoMovimiento.GASTO,
+                    categoria="Alimentación",
+                    fecha=datetime(2026, 10, 15, 9, 0, 0),
+                ),
+                Movimiento(
+                    id=None,
+                    descripcion="Transporte público",
+                    monto=Decimal("30.00"),
+                    tipo=TipoMovimiento.GASTO,
+                    categoria="Transporte",
+                    fecha=datetime(2026, 10, 15, 10, 0, 0),
+                ),
+                Movimiento(
+                    id=None,
+                    descripcion="Servicios básicos",
+                    monto=Decimal("120.00"),
+                    tipo=TipoMovimiento.GASTO,
+                    categoria="Hogar",
+                    fecha=datetime(2026, 10, 13, 8, 0, 0),
+                ),
+            ]
+            for movimiento in datos_iniciales:
+                repo.guardar(movimiento)
+    finally:
+        db.close()
 
+
+# POST /movimientos: crea un nuevo movimiento financiero
 @router.post(
     "/movimientos",
     response_model=MovimientoResponse,
@@ -71,6 +129,7 @@ def crear_movimiento(
     )
 
 
+# GET /movimientos/{id}: obtiene un movimiento por su ID
 @router.get(
     "/movimientos/{movimiento_id}",
     response_model=MovimientoResponse,
@@ -95,6 +154,7 @@ def obtener_movimiento(
     )
 
 
+# GET /movimientos: lista todos los movimientos
 @router.get(
     "/movimientos",
     response_model=List[MovimientoResponse],
@@ -115,6 +175,7 @@ def listar_movimientos(repository=Depends(get_repository)):
     ]
 
 
+# PUT /movimientos/{id}: actualiza un movimiento existente (campos opcionales)
 @router.put(
     "/movimientos/{movimiento_id}",
     response_model=MovimientoResponse,
@@ -147,6 +208,7 @@ def actualizar_movimiento(
     )
 
 
+# DELETE /movimientos/{id}: elimina un movimiento por su ID
 @router.delete(
     "/movimientos/{movimiento_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -164,6 +226,7 @@ def eliminar_movimiento(
     return None
 
 
+# GET /balance: calcula ingresos, gastos y saldo neto
 @router.get(
     "/balance",
     response_model=BalanceResponse,

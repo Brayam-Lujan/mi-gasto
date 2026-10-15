@@ -1,9 +1,11 @@
+/* Reset básico de márgenes y padding */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
+/* Estilos generales del cuerpo */
 body {
     font-family: Arial, sans-serif;
     background: #f4f6f8;
@@ -11,11 +13,13 @@ body {
     padding: 20px;
 }
 
+/* Contenedor principal centrado */
 .container {
     max-width: 900px;
     margin: 0 auto;
 }
 
+/* Encabezado de la página */
 header {
     text-align: center;
     margin-bottom: 30px;
@@ -31,6 +35,7 @@ header p {
     font-size: 14px;
 }
 
+/* Tarjetas de contenido */
 .card {
     background: #fff;
     border-radius: 8px;
@@ -47,6 +52,7 @@ header p {
     padding-bottom: 8px;
 }
 
+/* Formulario de nuevo movimiento */
 form {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -77,6 +83,7 @@ form button:hover {
     background: #219a52;
 }
 
+/* Tabla de movimientos */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -99,6 +106,7 @@ tr:nth-child(even) {
     background: #f9f9f9;
 }
 
+/* Panel de balance */
 .balance-box {
     display: flex;
     gap: 20px;
@@ -125,10 +133,12 @@ tr:nth-child(even) {
     font-weight: bold;
 }
 
-.ingresos .valor { color: #27ae60; }
-.gastos .valor { color: #c0392b; }
-.saldo .valor { color: #2980b9; }
+/* Colores de los valores del balance */
+.ingresos .valor { color: #27ae60; }   /* verde */
+.gastos .valor { color: #c0392b; }     /* rojo */
+.saldo .valor { color: #2980b9; }      /* azul */
 
+/* Botón de cargar datos */
 button.cargar {
     padding: 8px 16px;
     background: #3498db;
@@ -145,6 +155,7 @@ button.cargar:hover {
     background: #2980b9;
 }
 
+/* Mensajes de éxito o error temporales */
 .mensaje {
     margin-top: 10px;
     padding: 10px;
@@ -165,6 +176,7 @@ button.cargar:hover {
     border: 1px solid #c0392b;
 }
 
+/* Texto cuando no hay datos */
 .vacio {
     text-align: center;
     color: #7f8c8d;

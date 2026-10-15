@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict
 from app.domain.models import TipoMovimiento
 
 
+# Esquema Pydantic para validar el cuerpo de solicitud al crear un movimiento (POST /movimientos)
 class MovimientoCreate(BaseModel):
     descripcion: str
     monto: Decimal
@@ -17,6 +18,7 @@ class MovimientoCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+# Esquema Pydantic para validar el cuerpo de solicitud al actualizar un movimiento (PUT /movimientos/{id})
 class MovimientoUpdate(BaseModel):
     descripcion: Optional[str] = None
     monto: Optional[Decimal] = None
@@ -27,6 +29,7 @@ class MovimientoUpdate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+# Esquema Pydantic para la respuesta de un movimiento (incluye su ID asignado)
 class MovimientoResponse(BaseModel):
     id: int
     descripcion: str
@@ -38,6 +41,7 @@ class MovimientoResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+# Esquema Pydantic para la respuesta del balance (ingresos, gastos, saldo neto)
 class BalanceResponse(BaseModel):
     ingresos: Decimal
     gastos: Decimal
@@ -46,5 +50,6 @@ class BalanceResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+# Esquema Pydantic para respuestas de error
 class ErrorResponse(BaseModel):
     detail: str

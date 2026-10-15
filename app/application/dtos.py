@@ -4,6 +4,7 @@ from decimal import Decimal
 from app.domain.models import TipoMovimiento
 
 
+# DTO (objeto de transferencia de datos) para crear un nuevo movimiento
 class MovimientoCrearDTO:
     def __init__(
         self,
@@ -20,6 +21,7 @@ class MovimientoCrearDTO:
         self.fecha = fecha
 
 
+# DTO para actualizar un movimiento existente (todos los campos opcionales)
 class MovimientoActualizarDTO:
     def __init__(
         self,
@@ -36,6 +38,7 @@ class MovimientoActualizarDTO:
         self.fecha = fecha
 
 
+# DTO de respuesta con los datos de un movimiento (incluye su ID)
 class MovimientoRespuestaDTO:
     def __init__(
         self,
@@ -54,6 +57,7 @@ class MovimientoRespuestaDTO:
         self.fecha = fecha
 
 
+# DTO del balance: ingresos totales, gastos totales y saldo neto
 class BalanceDTO:
     def __init__(self, ingresos: Decimal, gastos: Decimal, saldo: Decimal):
         self.ingresos = ingresos

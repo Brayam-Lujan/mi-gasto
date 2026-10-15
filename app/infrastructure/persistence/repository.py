@@ -8,16 +8,18 @@ from app.infrastructure.persistence.mappers import MovimientoMapper
 from app.config.database import SessionLocal
 
 
+# Implementación concreta del repositorio usando SQLAlchemy
+# Cumple el contrato IMovimientoRepository (inversión de dependencias)
 class SQLAlchemyMovimientoRepository(IMovimientoRepository):
-    """Implementación concreta del repositorio usando SQLAlchemy."""
 
     def guardar(self, movimiento: Movimiento) -> Movimiento:
         db = SessionLocal()
         try:
+            # Mapea dominio a DBO y lo inserta en la base de datos
             dbo = MovimientoMapper.to_dbo(movimiento)
             db.add(dbo)
             db.commit()
-            db.refresh(dbo)
+            db.refresh(dbo)  # Obtiene el ID autogenerado
             return MovimientoMapper.to_domain(dbo)
         finally:
             db.close()
@@ -54,6 +56,7 @@ class SQLAlchemyMovimientoRepository(IMovimientoRepository):
             )
             if dbo is None:
                 raise ValueError("Movimiento no encontrado para actualizar")
+            # Actualiza campos del DBO con los valores de la entidad de dominio
             dbo.descripcion = movimiento.descripcion
             dbo.monto = movimiento.monto
             dbo.tipo = movimiento.tipo
