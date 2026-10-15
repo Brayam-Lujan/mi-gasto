@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiGasto — Gestión de Gastos e Ingresos</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MiGasto</h1>
+            <p>Backend para gestionar gastos e ingresos personales</p>
+        </header>
+
+        <!-- Formulario para crear movimiento -->
+        <div class="card">
+            <h2>Nuevo Movimiento</h2>
+            <form id="formMovimiento">
+                <input type="text" id="descripcion" placeholder="Descripción" required>
+                <input type="number" id="monto" step="0.01" min="0" placeholder="Monto" required>
+                <select id="tipo">
+                    <option value="INGRESO">Ingreso</option>
+                    <option value="GASTO">Gasto</option>
+                </select>
+                <input type="text" id="categoria" placeholder="Categoría" required>
+                <input type="datetime-local" id="fecha" required>
+                <button type="submit">Guardar</button>
+            </form>
+            <div id="mensajeForm" class="mensaje"></div>
+        </div>
+
+        <!-- Listado de movimientos -->
+        <div class="card">
+            <h2>Movimientos</h2>
+            <button class="cargar" onclick="cargarMovimientos()">Cargar movimientos</button>
+            <table id="tablaMovimientos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Descripción</th>
+                        <th>Monto</th>
+                        <th>Tipo</th>
+                        <th>Categoría</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    <tr><td colspan="7" class="vacio">No hay movimientos cargados.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Balance -->
+        <div class="card">
+            <h2>Balance</h2>
+            <button class="cargar" onclick="verBalance()">Calcular balance</button>
+            <div id="seccionBalance" class="balance-box" style="display:none;">
+                <div class="balance-card ingresos">
+                    <h3>Ingresos</h3>
+                    <div class="valor" id="valorIngresos">0</div>
+                </div>
+                <div class="balance-card gastos">
+                    <h3>Gastos</h3>
+                    <div class="valor" id="valorGastos">0</div>
+                </div>
+                <div class="balance-card saldo">
+                    <h3>Saldo neto</h3>
+                    <div class="valor" id="valorSaldo">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = '/movimientos';
+
+        function mostrarMensaje(id, texto, tipo) {
+            const el = document.getElementById(id);
+            el.textContent = texto;
+            el.className = 'mensaje ' + tipo;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 5000);
+        }
+
+        async function crearMovimiento(e) {
+            e.preventDefault();
+            const cuerpo = {
+                descripcion: document.getElementById('descripcion').value,
+                monto: parseFloat(document.getElementById('monto').value),
+                tipo: document.getElementById('tipo').value,
+                categoria: document.getElementById('categoria').value,
+                fecha: document.getElementById('fecha').value,
+            };
+
+            try {
+                const res = await fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(cuerpo),
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || 'Error al crear movimiento');
+                }
+
+                const data = await res.json();
+                mostrarMensaje('mensajeForm', 'Movimiento creado correctamente (ID: ' + data.id + ')', 'exito');
+                document.getElementById('formMovimiento').reset();
+                cargarMovimientos();
+            } catch (err) {
+                mostrarMensaje('mensajeForm', err.message, 'error');
+            }
+        }
+
+        async function cargarMovimientos() {
+            try {
+                const res = await fetch(API);
+                const datos = await res.json();
+                const tbody = document.getElementById('cuerpoTabla');
+                tbody.innerHTML = '';
+
+                if (!datos || datos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="vacio">No hay movimientos.</td></tr>';
+                    return;
+                }
+
+                datos.forEach(m => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${m.id}</td>
+                        <td>${m.descripcion}</td>
+                        <td>${m.monto}</td>
+                        <td>${m.tipo}</td>
+                        <td>${m.categoria}</td>
+                        <td>${m.fecha}</td>
+                        <td>
+                            <button onclick="eliminarMovimiento(${m.id})" style="background:#c0392b;color:#fff;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;">Eliminar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error(err);
+                alert('No se pudieron cargar los movimientos');
+            }
+        }
+
+        async function eliminarMovimiento(id) {
+            if (!confirm('¿Eliminar este movimiento?')) return;
+            try {
+                const res = await fetch(API + '/' + id, { method: 'DELETE' });
+                if (res.ok) {
+                    cargarMovimientos();
+                } else {
+                    alert('No se pudo eliminar');
+                }
+            } catch (err) {
+                alert('Error al eliminar');
+            }
+        }
+
+        async function verBalance() {
+            try {
+                const res = await fetch('/balance');
+                const datos = await res.json();
+                const seccion = document.getElementById('seccionBalance');
+                seccion.style.display = 'flex';
+                document.getElementById('valorIngresos').textContent = datos.ingresos;
+                document.getElementById('valorGastos').textContent = datos.gastos;
+                document.getElementById('valorSaldo').textContent = datos.saldo;
+            } catch (err) {
+                alert('No se pudo calcular el balance');
+            }
+        }
+
+        document.getElementById('formMovimiento').addEventListener('submit', crearMovimiento);
+    </script>
+</body>
+</html>
